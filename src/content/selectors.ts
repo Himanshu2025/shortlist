@@ -2,8 +2,28 @@
 // break as they roll class-name changes out. Each is a fallback chain: we
 // try entries in order and use the first one that returns anything. See
 // SELECTORS.md for how to re-derive these from a live page when they do.
+//
+// As of the last re-derivation, LinkedIn's feed classes are build-scoped
+// hashes (CSS-Modules-style, e.g. "_612e1a1c") with no semantic meaning —
+// there is nothing stable left to select by class name. The durable
+// anchors turned out to be accessibility attributes instead: every real
+// post has a "Hide post" / "Open control menu" button whose aria-label
+// names the author, and that's both the most reliable way to find a post
+// container and the cleanest way to read the author's name. The old
+// class/data-urn-based chains are kept below as trailing fallbacks in
+// case a rollout segment still uses them, but they are not expected to
+// match anymore.
+
+/** aria-label prefixes LinkedIn uses on a post's overflow-menu buttons,
+ * e.g. "Hide post by Jane Doe" / "Open control menu for post by Jane Doe".
+ * Both finding the post container and reading the author's name key off
+ * these — see findPostAnchorButton() and extractAuthorName() in extract.ts. */
+export const HIDE_POST_ARIA_PREFIXES = ["Hide post by ", "Open control menu for post by "];
 
 export const POST_CONTAINER_SELECTORS = [
+  `[role="listitem"]:has(${HIDE_POST_ARIA_PREFIXES.map((p) => `button[aria-label^="${p}"]`).join(", ")})`,
+  // Legacy fallbacks — unlikely to match current LinkedIn markup, kept in
+  // case a rollout segment still exposes semantic classes/data-urn.
   'div[data-urn^="urn:li:activity"]',
   'div[data-id^="urn:li:activity"]',
   "div.feed-shared-update-v2",
@@ -15,6 +35,9 @@ export const URN_ATTRIBUTE_SELECTORS = [
   '[data-id^="urn:li:activity"]',
 ];
 
+// Legacy selector chains — superseded by the heuristics in extract.ts
+// (header-block text classification, largest-self-contained-text-block
+// detection) but kept as a trailing fallback.
 export const POST_TEXT_SELECTORS = [
   ".feed-shared-update-v2__description .update-components-text",
   ".feed-shared-inline-show-more-text .update-components-text",

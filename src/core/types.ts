@@ -21,6 +21,9 @@ export interface Settings {
 }
 
 export interface FeedPost {
+  /** A stable-enough per-post identity key extracted from the DOM (see
+   * content/extract.ts:getUrn) — not necessarily a literal
+   * `urn:li:activity:...` string, just named for what it's for. */
   urn: string;
   text: string;
   authorName: string;

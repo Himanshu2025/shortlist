@@ -1,9 +1,7 @@
 # Shortlist
 
 A Chrome extension (Manifest V3) that highlights hiring posts in your
-LinkedIn feed that mention skills you care about, and collapses the ones
-that don't. It's a live view filter — it reads whatever's already on the
-page as you scroll, and doesn't remember or send anywhere what it saw.
+LinkedIn feed that mention skills you care about, and collapses the ones that don't. It's a live view filter — it reads whatever's already on the page as you scroll, and doesn't remember or send anywhere what it saw.
 
 Free and open source, MIT licensed.
 

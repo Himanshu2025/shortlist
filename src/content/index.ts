@@ -7,10 +7,11 @@ import { buildFeedPost } from "./extract";
 import { decoratePost, clearDecoration } from "./render";
 import { reportScan } from "./staleness";
 
-// Keyed on activity URN, not DOM node — the feed is virtualized and
-// recycles nodes, so without this we'd re-run matching every time a post
-// scrolls back into view. This Map lives only in memory: it dies on
-// reload, and that's what keeps "stores nothing" literally true.
+// Keyed on the post's render identity (FeedPost.urn — see extract.ts),
+// not DOM node — the feed is virtualized and recycles nodes, so without
+// this we'd re-run matching every time a post scrolls back into view.
+// This Map lives only in memory: it dies on reload, and that's what keeps
+// "stores nothing" literally true.
 const verdicts = new Map<string, Verdict>();
 
 let settings: Settings | null = null;
