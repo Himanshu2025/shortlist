@@ -1,0 +1,116 @@
+/* Injected into a shadow root only — never leaks into LinkedIn's page,
+   and LinkedIn's own CSS never reaches in here. */
+
+:host {
+  --sl-bg: #e6e9ee;
+  --sl-ink: #141b2d;
+  --sl-accent: #d98a0b;
+  --sl-muted: #6b7280;
+  --sl-border: #c7cdd6;
+  all: initial;
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  color: var(--sl-ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.sl-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  margin-bottom: 2px;
+  border-radius: 6px;
+  background: var(--sl-bg);
+  border-left: 3px solid var(--sl-accent);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sl-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sl-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--sl-border);
+  background: #fff;
+  color: var(--sl-ink);
+  white-space: nowrap;
+}
+
+.sl-chip--skill {
+  border-color: var(--sl-accent);
+  color: #7a5206;
+  background: #fdf3e2;
+  font-weight: 600;
+}
+
+.sl-chip--facet {
+  color: var(--sl-muted);
+}
+
+.sl-label {
+  font-weight: 600;
+  color: var(--sl-muted);
+}
+
+.sl-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--sl-bg);
+  border-left: 3px solid var(--sl-border);
+  font-size: 12px;
+}
+
+.sl-strip__author {
+  font-weight: 600;
+}
+
+.sl-strip__tag {
+  color: var(--sl-muted);
+}
+
+.sl-strip__expand {
+  all: unset;
+  cursor: pointer;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--sl-accent);
+  text-decoration: underline;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.sl-strip__expand:hover {
+  color: #b3760a;
+}
+
+.sl-strip__expand:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--sl-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sl-bar,
+  .sl-strip {
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
+  }
+}
