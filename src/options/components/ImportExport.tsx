@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
+import { Download, Upload } from "lucide-react";
 import type { Ruleset } from "../../core/types";
 import { parseRulesetJson, serializeRuleset } from "../../core/ruleset-io";
 import { Section } from "./ui/Section";
-import { Button } from "./ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface ImportExportProps {
   ruleset: Ruleset;
@@ -43,8 +44,14 @@ export function ImportExport({ ruleset, onImport }: ImportExportProps) {
       description="Settings portability only — your skills, aliases, and phrase lists. Never post data."
     >
       <div className="flex flex-wrap items-center gap-2">
-        <Button onClick={handleExport}>Export ruleset (.json)</Button>
-        <Button onClick={() => fileInput.current?.click()}>Import ruleset…</Button>
+        <Button variant="ghost" onClick={handleExport}>
+          <Download />
+          Export ruleset (.json)
+        </Button>
+        <Button variant="ghost" onClick={() => fileInput.current?.click()}>
+          <Upload />
+          Import ruleset…
+        </Button>
         <input
           ref={fileInput}
           type="file"
@@ -57,7 +64,7 @@ export function ImportExport({ ruleset, onImport }: ImportExportProps) {
           }}
         />
       </div>
-      {error && <p className="mt-2 text-xs text-red-700 dark:text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-xs text-red-700">{error}</p>}
     </Section>
   );
 }

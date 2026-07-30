@@ -30,7 +30,7 @@ async function render(): Promise<void> {
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.checked = settings.enabled;
-  checkbox.style.cssText = "width: 16px; height: 16px; accent-color: #d98a0b;";
+  checkbox.style.cssText = "width: 16px; height: 16px; accent-color: #f97316;";
   checkbox.addEventListener("change", () => {
     void saveSettings({ ...settings, enabled: checkbox.checked });
   });
@@ -48,8 +48,8 @@ async function render(): Promise<void> {
     "font-weight: 600",
     "padding: 8px",
     "border-radius: 6px",
-    "background: #d98a0b",
-    "color: #141b2d",
+    "background: #f97316",
+    "color: #1c1917",
   ].join(";");
   optionsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
   root.appendChild(optionsButton);

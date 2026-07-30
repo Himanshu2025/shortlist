@@ -1,9 +1,9 @@
+import { ListFilter } from "lucide-react";
 import { useSettings } from "./useSettings";
 import {
   DEFAULT_SKILLS,
   DEFAULT_LOCATIONS,
   DEFAULT_HIRING_PHRASES,
-  DEFAULT_RECRUITER_TERMS,
   DEFAULT_EXCLUDE_PHRASES,
 } from "../core/defaults";
 import { Toggles } from "./components/Toggles";
@@ -27,14 +27,19 @@ export function App() {
   const { ruleset } = settings;
 
   return (
-    <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
+    <div className="min-h-screen bg-paper text-ink">
       <div className="mx-auto flex max-w-2xl flex-col gap-5 px-6 py-10">
-        <header>
-          <h1 className="text-lg font-bold">Shortlist</h1>
-          <p className="mt-1 text-sm text-ink/60 dark:text-paper/60">
-            Highlights hiring posts that mention your skills, collapses the rest. Nothing here
-            leaves your browser.
-          </p>
+        <header className="flex items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-ink shadow-sm">
+            <ListFilter className="size-5" />
+          </span>
+          <div>
+            <h1 className="text-lg font-bold">Shortlist</h1>
+            <p className="text-sm text-ink/60">
+              Highlights hiring posts that mention your skills, collapses the rest. Nothing here
+              leaves your browser.
+            </p>
+          </div>
         </header>
 
         <FilterSentence skills={ruleset.skills} locations={ruleset.locations} />
@@ -69,7 +74,7 @@ export function App() {
 
         <PhraseList
           title="Hiring phrases"
-          description="Gate 1: a post needs one of these in its body (or a recruiter term in the author's headline) to be considered a hiring post at all."
+          description="Gate 1: a post needs one of these in its body to be considered a hiring post at all — regardless of who's posting it."
           phrases={ruleset.hiringPhrases}
           onChange={(hiringPhrases) =>
             update((s) => ({ ...s, ruleset: { ...s.ruleset, hiringPhrases } }))
@@ -81,22 +86,6 @@ export function App() {
             }))
           }
           placeholder="e.g. now recruiting"
-        />
-
-        <PhraseList
-          title="Recruiter headline terms"
-          description="Matched against the post author's headline, not the post body."
-          phrases={ruleset.recruiterTerms}
-          onChange={(recruiterTerms) =>
-            update((s) => ({ ...s, ruleset: { ...s.ruleset, recruiterTerms } }))
-          }
-          onReset={() =>
-            update((s) => ({
-              ...s,
-              ruleset: { ...s.ruleset, recruiterTerms: DEFAULT_RECRUITER_TERMS },
-            }))
-          }
-          placeholder="e.g. talent partner"
         />
 
         <PhraseList

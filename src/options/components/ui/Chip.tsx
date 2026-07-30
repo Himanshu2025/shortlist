@@ -1,3 +1,7 @@
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+
 interface ChipProps {
   label: string;
   onRemove?: () => void;
@@ -6,25 +10,18 @@ interface ChipProps {
 
 export function Chip({ label, onRemove, active }: ChipProps) {
   return (
-    <span
-      className={[
-        "inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-xs",
-        active
-          ? "border-accent bg-accent/10 text-ink dark:text-paper font-semibold"
-          : "border-ink/15 bg-white text-ink dark:border-paper/20 dark:bg-white/5 dark:text-paper",
-      ].join(" ")}
-    >
+    <Badge variant={active ? "accent" : "outline"} className={cn(onRemove && "pr-1")}>
       {label}
       {onRemove && (
         <button
           type="button"
           onClick={onRemove}
           aria-label={`Remove ${label}`}
-          className="ml-0.5 rounded-sm text-ink/40 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent dark:text-paper/40 dark:hover:text-paper"
+          className="ml-0.5 rounded-sm p-0.5 text-ink/40 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
-          ×
+          <X className="size-3" />
         </button>
       )}
-    </span>
+    </Badge>
   );
 }

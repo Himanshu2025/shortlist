@@ -17,7 +17,6 @@ export interface CompiledSkill {
 
 export interface CompiledRuleset {
   hiring: CompiledPhraseList;
-  recruiter: CompiledPhraseList;
   exclude: CompiledPhraseList;
   locations: CompiledPhraseList;
   skills: CompiledSkill[];
@@ -38,7 +37,6 @@ function compilePhraseList(phrases: string[]): CompiledPhraseList {
 export function compileRuleset(ruleset: Ruleset): CompiledRuleset {
   return {
     hiring: compilePhraseList(ruleset.hiringPhrases),
-    recruiter: compilePhraseList(ruleset.recruiterTerms),
     exclude: compilePhraseList(ruleset.excludePhrases),
     locations: compilePhraseList(ruleset.locations),
     skills: ruleset.skills.map((skill) => {

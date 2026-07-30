@@ -8,6 +8,11 @@ import { resolve } from "node:path";
 // so code-splitting and multiple chunks are fine here.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "./src"),
+    },
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,

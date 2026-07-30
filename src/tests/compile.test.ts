@@ -8,7 +8,6 @@ function rulesetWith(overrides: Partial<Ruleset>): Ruleset {
     skills: [],
     locations: [],
     hiringPhrases: [],
-    recruiterTerms: [],
     excludePhrases: [],
     ...overrides,
   };
@@ -30,7 +29,7 @@ describe("compileRuleset", () => {
     const compiled = compileRuleset(
       rulesetWith({ hiringPhrases: ["we're looking for"] }),
     );
-    const wrapped = { urn: "1", text: "we're   looking\nfor  engineers", authorName: "", authorHeadline: "" };
+    const wrapped = { urn: "1", text: "we're   looking\nfor  engineers", authorName: "" };
     expect(compiled.hiring.combined.test(wrapped.text)).toBe(true);
   });
 

@@ -32,16 +32,6 @@ export const DEFAULT_HIRING_PHRASES: string[] = [
   "drop your resume",
 ];
 
-export const DEFAULT_RECRUITER_TERMS: string[] = [
-  "recruiter",
-  "recruiting",
-  "recruitment",
-  "talent acquisition",
-  "talent partner",
-  "staffing",
-  "TA",
-];
-
 export const DEFAULT_EXCLUDE_PHRASES: string[] = [
   "congrats",
   "congratulations",
@@ -58,6 +48,5 @@ export const DEFAULT_RULESET: Ruleset = {
   skills: DEFAULT_SKILLS,
   locations: DEFAULT_LOCATIONS,
   hiringPhrases: DEFAULT_HIRING_PHRASES,
-  recruiterTerms: DEFAULT_RECRUITER_TERMS,
   excludePhrases: DEFAULT_EXCLUDE_PHRASES,
 };

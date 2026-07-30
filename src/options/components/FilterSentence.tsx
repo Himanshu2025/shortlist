@@ -1,3 +1,4 @@
+import { Filter } from "lucide-react";
 import type { SkillRule } from "../../core/types";
 
 function joinOr(items: string[]): string {
@@ -27,8 +28,9 @@ export function FilterSentence({ skills, locations }: FilterSentenceProps) {
         ".";
 
   return (
-    <p className="rounded-md border border-accent/30 bg-accent/5 px-3 py-2 text-sm text-ink dark:text-paper">
-      {sentence}
+    <p className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3.5 py-2.5 text-sm text-ink">
+      <Filter className="mt-0.5 size-4 shrink-0 text-accent" />
+      <span>{sentence}</span>
     </p>
   );
 }

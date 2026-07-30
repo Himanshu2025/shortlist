@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { Chip } from "./ui/Chip";
-import { Button } from "./ui/Button";
 import { Section } from "./ui/Section";
 import { ResetSection } from "./ui/ResetSection";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface PhraseListProps {
   title: string;
@@ -42,14 +44,14 @@ export function PhraseList({
     <Section title={title} description={description} action={<ResetSection onReset={onReset} />}>
       <div className="mb-3 flex flex-wrap gap-2">
         {phrases.length === 0 && (
-          <p className="text-xs italic text-ink/40 dark:text-paper/40">No phrases yet.</p>
+          <p className="text-xs italic text-ink/40">No phrases yet.</p>
         )}
         {phrases.map((phrase, i) => (
           <Chip key={`${phrase}-${i}`} label={phrase} onRemove={() => removePhrase(i)} />
         ))}
       </div>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -60,9 +62,12 @@ export function PhraseList({
             }
           }}
           placeholder={placeholder}
-          className="w-full max-w-xs rounded-md border border-ink/15 bg-white px-2.5 py-1.5 text-sm text-ink placeholder:text-ink/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent dark:border-paper/20 dark:bg-white/5 dark:text-paper dark:placeholder:text-paper/30"
+          className="max-w-xs"
         />
-        <Button onClick={addPhrase}>Add</Button>
+        <Button variant="ghost" onClick={addPhrase}>
+          <Plus />
+          Add
+        </Button>
       </div>
     </Section>
   );

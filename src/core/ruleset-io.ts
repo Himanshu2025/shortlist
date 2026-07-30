@@ -40,9 +40,6 @@ export function parseRulesetJson(raw: string): RulesetImportResult {
   if (!isStringArray(candidate["hiringPhrases"])) {
     return { ok: false, error: 'Invalid "hiringPhrases" — expected a string array.' };
   }
-  if (!isStringArray(candidate["recruiterTerms"])) {
-    return { ok: false, error: 'Invalid "recruiterTerms" — expected a string array.' };
-  }
   if (!isStringArray(candidate["excludePhrases"])) {
     return { ok: false, error: 'Invalid "excludePhrases" — expected a string array.' };
   }
@@ -53,7 +50,6 @@ export function parseRulesetJson(raw: string): RulesetImportResult {
       skills: candidate["skills"] as SkillRule[],
       locations: candidate["locations"] as string[],
       hiringPhrases: candidate["hiringPhrases"] as string[],
-      recruiterTerms: candidate["recruiterTerms"] as string[],
       excludePhrases: candidate["excludePhrases"] as string[],
     },
   };

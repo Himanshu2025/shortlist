@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import type { SkillRule } from "../../core/types";
 import { Chip } from "./ui/Chip";
-import { Button } from "./ui/Button";
 import { Section } from "./ui/Section";
 import { ResetSection } from "./ui/ResetSection";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface SkillEditorProps {
   skills: SkillRule[];
@@ -38,15 +40,16 @@ function SkillRow({
   };
 
   return (
-    <div className="rounded-md border border-ink/10 p-3 dark:border-paper/10">
+    <div className="rounded-md border border-ink/10 p-3">
       <div className="mb-2 flex items-center gap-2">
-        <input
+        <Input
           type="text"
           value={skill.name}
           onChange={(e) => onChange({ ...skill, name: e.target.value })}
-          className="rounded-md border border-ink/15 bg-white px-2 py-1 font-mono text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent dark:border-paper/20 dark:bg-white/5 dark:text-paper"
+          className="w-auto font-mono font-semibold"
         />
-        <Button variant="danger" className="ml-auto" onClick={onRemove}>
+        <Button variant="destructive" size="sm" className="ml-auto" onClick={onRemove}>
+          <Trash2 />
           Remove skill
         </Button>
       </div>
@@ -56,7 +59,7 @@ function SkillRow({
         ))}
       </div>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={aliasDraft}
           onChange={(e) => setAliasDraft(e.target.value)}
@@ -67,9 +70,10 @@ function SkillRow({
             }
           }}
           placeholder="Add an alias…"
-          className="w-full max-w-[220px] rounded-md border border-ink/15 bg-white px-2.5 py-1 text-xs placeholder:text-ink/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent dark:border-paper/20 dark:bg-white/5 dark:text-paper dark:placeholder:text-paper/30"
+          className="max-w-[220px] text-xs"
         />
-        <Button variant="ghost" className="text-xs" onClick={addAlias}>
+        <Button variant="ghost" size="sm" className="text-xs" onClick={addAlias}>
+          <Plus />
           Add alias
         </Button>
       </div>
@@ -106,7 +110,10 @@ export function SkillEditor({ skills, onChange, onReset }: SkillEditorProps) {
           />
         ))}
       </div>
-      <Button onClick={addSkill}>Add skill</Button>
+      <Button variant="ghost" onClick={addSkill}>
+        <Plus />
+        Add skill
+      </Button>
     </Section>
   );
 }

@@ -6,10 +6,18 @@ export function escapeRegex(literal: string): string {
   return literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** LinkedIn (and rich-text editors generally) render typographic quotes —
+ * "we're" comes out as "we’re", not "we're". Phrases and extracted
+ * DOM text both get normalized to the plain ASCII form so a phrase typed
+ * with a straight quote still matches text rendered with a curly one. */
+export function normalizeQuotes(text: string): string {
+  return text.replace(/[‘’ʼ]/g, "'").replace(/[“”]/g, '"');
+}
+
 /** Multi-word phrases collapse internal whitespace to `\s+` so line-wrapped
  * DOM text still matches. */
 function phraseToPattern(phrase: string): string {
-  return phrase
+  return normalizeQuotes(phrase)
     .trim()
     .split(/\s+/)
     .filter(Boolean)

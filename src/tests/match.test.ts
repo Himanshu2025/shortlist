@@ -4,13 +4,13 @@ import { compileRuleset } from "../core/compile";
 import { evaluatePost, isJobPost, matchSkills } from "../core/match";
 import {
   CONGRATS_REACT_POST,
+  FOUNDER_CURLY_QUOTE_POST,
   HIRING_NO_WANTED_SKILL_POST,
   HIRING_REACT_POST,
   NODE_HYPHEN_COMPOUND_POST,
   NODE_JS_MENTION_POST,
   NON_HIRING_POST,
   REACTIVE_FALSE_POSITIVE_POST,
-  RECRUITER_HEADLINE_NO_BODY_PHRASE_POST,
   SENIORITY_AND_REMOTE_POST,
 } from "./fixtures/posts";
 
@@ -27,8 +27,15 @@ describe("isJobPost", () => {
     expect(isJobPost(CONGRATS_REACT_POST, compiled)).toBe(false);
   });
 
-  it("flags a post via recruiter headline even without a body hiring phrase", () => {
-    expect(isJobPost(RECRUITER_HEADLINE_NO_BODY_PHRASE_POST, compiled)).toBe(true);
+  it("flags a hiring post regardless of who's posting it — no author/headline signal required", () => {
+    expect(isJobPost(FOUNDER_CURLY_QUOTE_POST, compiled)).toBe(true);
+  });
+
+  it("matches a hiring phrase even when the post uses a typographic apostrophe", () => {
+    // Regression test: LinkedIn renders "We're" as "We’re" (curly '),
+    // but the default phrase list is typed with a straight one.
+    expect(FOUNDER_CURLY_QUOTE_POST.text).toContain("’");
+    expect(isJobPost(FOUNDER_CURLY_QUOTE_POST, compiled)).toBe(true);
   });
 
   it("rejects an ordinary post with no hiring signal", () => {
@@ -95,8 +102,9 @@ describe("evaluatePost", () => {
     expect(verdict.matchedSkills).toContain("TypeScript");
   });
 
-  it("reports which hiring phrase and recruiter term fired", () => {
-    const verdict = evaluatePost(RECRUITER_HEADLINE_NO_BODY_PHRASE_POST, compiled);
-    expect(verdict.explanation.recruiterTermHit).not.toBeNull();
+  it("matches a founder's hiring post on skills, same as any other author", () => {
+    const verdict = evaluatePost(FOUNDER_CURLY_QUOTE_POST, compiled);
+    expect(verdict.matchedSkills).toEqual(expect.arrayContaining(["React", "TypeScript"]));
+    expect(verdict.isMatch).toBe(true);
   });
 });

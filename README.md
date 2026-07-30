@@ -41,10 +41,12 @@ model, no async, so there's no race and no scroll jump from a verdict
 arriving late.
 
 1. **Is this a hiring post?** The post body matches one of your configured
-   hiring phrases, OR the author's headline matches a recruiter term —
-   AND none of your exclude phrases match. The exclude list is what stops
-   "congrats on landing your new React role" from being flagged just
-   because it mentions React and "role".
+   hiring phrases AND none of your exclude phrases match. This is
+   deliberately about the *post text*, not who's posting it — a founder or
+   an engineer writing "we're hiring" is just as valid a signal as a
+   recruiter, so there's no author/headline check gating this. The exclude
+   list is what stops "congrats on landing your new React role" from being
+   flagged just because it mentions React and "role".
 2. **Does it name a skill you care about?** Each skill's name and aliases
    are compiled into a word-boundary-guarded regex, so "React" doesn't
    match "reactive" or "reaction", and a bare alias like "node" doesn't
@@ -54,7 +56,10 @@ Nothing here is hardcoded — every phrase list and skill/alias mapping is
 plain user data, edited from the options page, with "reset to defaults"
 per section if you want to start over. Matching rules are compiled from
 plain phrases you type, never raw regex, so a typo can't throw inside the
-feed's `MutationObserver` or backtrack the tab into a freeze.
+feed's `MutationObserver` or backtrack the tab into a freeze. Phrases and
+extracted post text are both normalized for typographic quotes (LinkedIn
+renders "we're" as "we’re"), so a phrase typed with a straight apostrophe
+still matches text rendered with a curly one.
 
 Seniority, work mode, and sponsorship are also extracted by plain regex
 for display only — all three are nullable, since most posts say nothing

@@ -3,7 +3,7 @@ import { getCompiledRuleset } from "../core/compile";
 import { evaluatePost } from "../core/match";
 import { loadSettings, onSettingsChanged } from "../storage/storage";
 import { POST_CONTAINER_SELECTORS, queryAllChain } from "./selectors";
-import { buildFeedPost } from "./extract";
+import { buildFeedPost, getUrn } from "./extract";
 import { decoratePost, clearDecoration } from "./render";
 import { reportScan } from "./staleness";
 
@@ -16,6 +16,8 @@ const verdicts = new Map<string, Verdict>();
 
 let settings: Settings | null = null;
 let scanScheduled = false;
+let lastScanAt = 0;
+const MIN_SCAN_INTERVAL_MS = 200;
 
 function scan(nodesObserved: boolean): void {
   if (!settings) return;
@@ -24,9 +26,13 @@ function scan(nodesObserved: boolean): void {
   let extracted = 0;
 
   for (const container of containers) {
-    const post = buildFeedPost(container);
-    if (!post) continue;
-    if (post.text) extracted += 1;
+    // Cheap attribute read first — only pay for full DOM-text extraction
+    // (buildFeedPost) when the container isn't already correctly
+    // decorated for this exact post. Without this, every scan re-walks
+    // every post's full text on every mutation, even ones we've already
+    // processed.
+    const urn = getUrn(container);
+    if (!urn) continue;
 
     if (!settings.enabled) {
       clearDecoration(container);
@@ -34,8 +40,14 @@ function scan(nodesObserved: boolean): void {
     }
 
     const el = container as HTMLElement;
-    const alreadyCorrect = el.dataset["slUrn"] === post.urn && verdicts.has(post.urn);
-    if (alreadyCorrect) continue;
+    if (el.dataset["slUrn"] === urn && verdicts.has(urn)) {
+      extracted += 1;
+      continue;
+    }
+
+    const post = buildFeedPost(container);
+    if (!post) continue;
+    if (post.text) extracted += 1;
 
     let verdict = verdicts.get(post.urn);
     if (!verdict) {
@@ -49,15 +61,37 @@ function scan(nodesObserved: boolean): void {
   }
 
   reportScan(nodesObserved, containers.length, extracted);
+  narrowObserverScope(containers);
+}
+
+let observer: MutationObserver | null = null;
+let observedRoot: Node = document.body;
+
+/** The observer starts on document.body so it doesn't miss the feed
+ * before it's mounted. Once real posts are found, narrow it to their
+ * nearest role="list" ancestor — the scrollable list every virtualized
+ * item mounts/unmounts inside — so unrelated churn elsewhere on the page
+ * (nav bar, chat widget, notification badges) stops triggering a rescan.
+ * Stays on document.body if no such ancestor turns up. */
+function narrowObserverScope(containers: Element[]): void {
+  if (observedRoot !== document.body || containers.length === 0 || !observer) return;
+  const list = containers[0]?.closest('[role="list"]');
+  if (!list || list === observedRoot) return;
+
+  observer.disconnect();
+  observedRoot = list;
+  observer.observe(observedRoot, { childList: true, subtree: true });
 }
 
 function scheduleScan(): void {
   if (scanScheduled) return;
   scanScheduled = true;
-  requestAnimationFrame(() => {
+  const delay = Math.max(0, MIN_SCAN_INTERVAL_MS - (performance.now() - lastScanAt));
+  window.setTimeout(() => {
     scanScheduled = false;
+    lastScanAt = performance.now();
     scan(true);
-  });
+  }, delay);
 }
 
 async function init(): Promise<void> {
@@ -72,12 +106,13 @@ async function init(): Promise<void> {
   });
 
   scan(true);
+  lastScanAt = performance.now();
 
-  const observer = new MutationObserver((mutations) => {
+  observer = new MutationObserver((mutations) => {
     const sawAddedNodes = mutations.some((m) => m.addedNodes.length > 0);
     if (sawAddedNodes) scheduleScan();
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(observedRoot, { childList: true, subtree: true });
 }
 
 void init();

@@ -1,6 +1,5 @@
 import type { FeedPost } from "../core/types";
 import {
-  AUTHOR_HEADLINE_SELECTORS,
   AUTHOR_NAME_SELECTORS,
   HIDE_POST_ARIA_PREFIXES,
   POST_TEXT_SELECTORS,
@@ -43,9 +42,9 @@ function findPostAnchorButton(container: Element): HTMLElement | null {
 }
 
 /** The header block: the smallest ancestor of the anchor button that also
- * contains the author's profile/company link. This is where name, the
- * connection-degree badge, headline, and timestamp all live as sibling
- * text spans with no distinguishing class — see extractAuthorHeadline(). */
+ * contains the author's profile/company link. Excluded from post-body-text
+ * detection below so the author's name/timestamp text never gets picked up
+ * as the post body. */
 function findHeaderBlock(container: Element, anchorButton: Element): Element | null {
   const nameLink = [...container.querySelectorAll('a[href*="/in/"], a[href*="/company/"]')].find(
     (a) => (a.textContent ?? "").trim().length > 0,
@@ -83,42 +82,6 @@ export function extractAuthorName(container: Element): string {
   return (node?.textContent ?? "").trim();
 }
 
-const CONNECTION_BADGE_PATTERN = /^•?\s*(1st|2nd|3rd\+?|Following|You)\b/i;
-const TIMESTAMP_PATTERN = /^\d+\s*(s|m|h|d|w|mo|yr)s?\b/i;
-
-/** Direct (non-descendant) text owned by each element under `root`, in
- * document order — used to classify the header's unstyled sibling spans
- * (name / connection badge / headline / timestamp) by content pattern
- * rather than by class, since none of them carry one. */
-function ownTextsInOrder(root: Element): string[] {
-  const results: string[] = [];
-  root.querySelectorAll("*").forEach((el) => {
-    const ownText = [...el.childNodes]
-      .filter((node) => node.nodeType === Node.TEXT_NODE)
-      .map((node) => node.textContent?.trim() ?? "")
-      .join("")
-      .trim();
-    if (ownText) results.push(ownText);
-  });
-  return results;
-}
-
-export function extractAuthorHeadline(container: Element, authorName: string): string {
-  const anchorButton = findPostAnchorButton(container);
-  const header = anchorButton ? findHeaderBlock(container, anchorButton) : null;
-  if (header) {
-    const candidate = ownTextsInOrder(header).find(
-      (text) =>
-        text !== authorName &&
-        !CONNECTION_BADGE_PATTERN.test(text) &&
-        !TIMESTAMP_PATTERN.test(text),
-    );
-    if (candidate) return candidate;
-  }
-  const node = queryOneChain(container, AUTHOR_HEADLINE_SELECTORS);
-  return (node?.textContent ?? "").trim();
-}
-
 const TEXT_BLOCK_THRESHOLD = 40;
 
 /** LinkedIn renders a screen-reader-only duplicate of some text (e.g. a
@@ -136,23 +99,49 @@ function isSelfDuplicate(text: string): boolean {
  * "self-contained" text block in the post outside the header: an element
  * whose own aggregated text clears the threshold but none of whose direct
  * children individually do (the tightest wrapper around that text run),
- * skipping the screen-reader duplicate pattern. */
+ * skipping the screen-reader duplicate pattern.
+ *
+ * Single bottom-up walk, not `querySelectorAll("*")` + `.textContent` per
+ * element — `.textContent` re-walks an element's whole subtree internally,
+ * so calling it at every level of a deep post tree is quadratic-ish. This
+ * computes each element's aggregated text exactly once, reusing children's
+ * already-computed text on the way back up. */
 function findPostBodyText(container: Element, header: Element | null): string {
-  const candidates: string[] = [];
-  container.querySelectorAll("*").forEach((el) => {
-    if (header && (header === el || header.contains(el))) return;
-    const own = (el.textContent ?? "").trim();
-    if (own.length < TEXT_BLOCK_THRESHOLD) return;
-    const hasQualifyingChild = [...el.children].some(
-      (child) => (child.textContent ?? "").trim().length >= TEXT_BLOCK_THRESHOLD,
-    );
-    if (hasQualifyingChild) return;
-    if (isSelfDuplicate(own)) return;
-    candidates.push(own);
-  });
-  if (candidates.length === 0) return "";
-  candidates.sort((a, b) => b.length - a.length);
-  return stripSeeMore(candidates[0] ?? "");
+  let bestText = "";
+  let bestLength = 0;
+
+  function visit(el: Element): string {
+    if (header && (header === el || header.contains(el))) return "";
+
+    let combined = "";
+    let hasQualifyingChild = false;
+    for (const node of el.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        combined += node.textContent ?? "";
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const childText = visit(node as Element);
+        combined += childText;
+        if (childText.trim().length >= TEXT_BLOCK_THRESHOLD) hasQualifyingChild = true;
+      }
+    }
+
+    if (!hasQualifyingChild) {
+      const trimmed = combined.trim();
+      if (
+        trimmed.length >= TEXT_BLOCK_THRESHOLD &&
+        trimmed.length > bestLength &&
+        !isSelfDuplicate(trimmed)
+      ) {
+        bestLength = trimmed.length;
+        bestText = trimmed;
+      }
+    }
+
+    return combined;
+  }
+
+  visit(container);
+  return bestText ? stripSeeMore(bestText) : "";
 }
 
 /** Reads textContent, not visible text — LinkedIn clamps long posts behind
@@ -170,11 +159,9 @@ export function extractPostText(container: Element): string {
 export function buildFeedPost(container: Element): FeedPost | null {
   const urn = getUrn(container);
   if (!urn) return null;
-  const authorName = extractAuthorName(container);
   return {
     urn,
     text: extractPostText(container),
-    authorName,
-    authorHeadline: extractAuthorHeadline(container, authorName),
+    authorName: extractAuthorName(container),
   };
 }

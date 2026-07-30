@@ -51,11 +51,6 @@ export const AUTHOR_NAME_SELECTORS = [
   ".feed-shared-actor__name",
 ];
 
-export const AUTHOR_HEADLINE_SELECTORS = [
-  ".update-components-actor__description",
-  ".feed-shared-actor__description",
-];
-
 function tryQuerySelectorAll(root: ParentNode, selector: string): Element[] {
   try {
     return Array.from(root.querySelectorAll(selector));

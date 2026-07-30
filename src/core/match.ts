@@ -1,44 +1,48 @@
 import type { CompiledRuleset, CompiledPhraseList } from "./compile";
 import type { FeedPost, MatchExplanation, Verdict } from "./types";
 import { extractFacets } from "./facets";
+import { normalizeQuotes } from "./phrase";
 
-/** Gate 1: is this someone hiring? Hiring language in the post body, or a
- * recruiter/talent headline, counts as a candidate — unless the post reads
- * as a congratulations/announcement, which the exclude list kills without
- * needing semantics ("congrats on landing your new React role"). */
+/** Gate 1: is this someone hiring? Hiring language in the post body counts
+ * as a candidate — regardless of who's posting it, a founder or engineer
+ * writing "we're hiring" is just as real a signal as a recruiter — unless
+ * the post reads as a congratulations/announcement, which the exclude list
+ * kills without needing semantics ("congrats on landing your new React
+ * role"). */
 export function isJobPost(post: FeedPost, compiled: CompiledRuleset): boolean {
-  const looksLikeHiring =
-    compiled.hiring.combined.test(post.text) ||
-    compiled.recruiter.combined.test(post.authorHeadline);
-  if (!looksLikeHiring) return false;
-  return !compiled.exclude.combined.test(post.text);
+  const text = normalizeQuotes(post.text);
+  if (!compiled.hiring.combined.test(text)) return false;
+  return !compiled.exclude.combined.test(text);
 }
 
 /** Gate 2: does it name any skill from the ruleset? */
 export function matchSkills(text: string, compiled: CompiledRuleset): string[] {
+  const normalized = normalizeQuotes(text);
   return compiled.skills
-    .filter((skill) => skill.combined.test(text))
+    .filter((skill) => skill.combined.test(normalized))
     .map((skill) => skill.name);
 }
 
 export function matchLocations(text: string, compiled: CompiledRuleset): string[] {
+  const normalized = normalizeQuotes(text);
   return compiled.locations.items
-    .filter((item) => item.regex.test(text))
+    .filter((item) => item.regex.test(normalized))
     .map((item) => item.phrase);
 }
 
+// Phrases are normalized at compile time (see phrase.ts); text is
+// normalized here, at every point it gets tested against a compiled
+// pattern — so quote-style differences between a typed phrase and
+// LinkedIn's rendered text (or a user's pasted sample in the tester)
+// can't cause a silent mismatch either way.
 function firstHit(list: CompiledPhraseList, text: string): string | null {
-  return list.items.find((item) => item.regex.test(text))?.phrase ?? null;
+  const normalized = normalizeQuotes(text);
+  return list.items.find((item) => item.regex.test(normalized))?.phrase ?? null;
 }
 
-export function explainMatch(
-  text: string,
-  authorHeadline: string,
-  compiled: CompiledRuleset,
-): MatchExplanation {
+export function explainMatch(text: string, compiled: CompiledRuleset): MatchExplanation {
   return {
     hiringPhraseHit: firstHit(compiled.hiring, text),
-    recruiterTermHit: firstHit(compiled.recruiter, authorHeadline),
     excludePhraseHit: firstHit(compiled.exclude, text),
     matchedSkills: matchSkills(text, compiled),
     matchedLocations: matchLocations(text, compiled),
@@ -53,7 +57,7 @@ export function evaluatePost(post: FeedPost, compiled: CompiledRuleset): Verdict
   const matchedSkills = matchSkills(post.text, compiled);
   const matchedLocations = matchLocations(post.text, compiled);
   const facets = extractFacets(post.text);
-  const explanation = explainMatch(post.text, post.authorHeadline, compiled);
+  const explanation = explainMatch(post.text, compiled);
 
   return {
     isJobPost: jobPost,

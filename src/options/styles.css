@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
-  --color-paper: #e6e9ee;
-  --color-ink: #141b2d;
-  --color-accent: #d98a0b;
+  --color-paper: #fafaf9;
+  --color-ink: #1c1917;
+  --color-accent: #f97316;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --font-sans:
@@ -12,7 +13,7 @@
 
 html {
   font-family: var(--font-sans);
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {

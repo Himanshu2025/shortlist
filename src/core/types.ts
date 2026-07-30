@@ -9,7 +9,6 @@ export interface Ruleset {
   skills: SkillRule[];
   locations: string[];
   hiringPhrases: string[];
-  recruiterTerms: string[];
   excludePhrases: string[];
 }
 
@@ -27,7 +26,6 @@ export interface FeedPost {
   urn: string;
   text: string;
   authorName: string;
-  authorHeadline: string;
 }
 
 export type Seniority = "junior" | "mid" | "senior" | "staff" | "lead" | null;
@@ -42,7 +40,6 @@ export interface Facets {
 
 export interface MatchExplanation {
   hiringPhraseHit: string | null;
-  recruiterTermHit: string | null;
   excludePhraseHit: string | null;
   matchedSkills: string[];
   matchedLocations: string[];
