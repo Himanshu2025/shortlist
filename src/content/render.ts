@@ -125,6 +125,35 @@ function renderMissStrip(
   shadow.appendChild(strip);
 }
 
+// Collapsing many posts to max-height:0 in one synchronous batch (e.g. the
+// first scan right after a reload, or a full re-scan after a ruleset
+// change) shrinks the feed's total scroll height in a single discontinuous
+// jump. LinkedIn's own scroll-position-based "load more" trigger reads
+// that same scrollHeight, and a sudden jump can fire it prematurely or
+// desync whatever cursor/index bookkeeping gates it, stalling infinite
+// scroll entirely. Spreading the actual collapse across animation frames
+// avoids the jump; growing a post back to full height (uncollapsing) has
+// no such risk, since it only makes the page taller, so it stays instant.
+const COLLAPSE_BATCH_SIZE = 5;
+let collapseQueue: (() => void)[] = [];
+let collapseFlushScheduled = false;
+
+function scheduleCollapseFlush(): void {
+  if (collapseFlushScheduled) return;
+  collapseFlushScheduled = true;
+  requestAnimationFrame(() => {
+    collapseFlushScheduled = false;
+    const batch = collapseQueue.splice(0, COLLAPSE_BATCH_SIZE);
+    for (const task of batch) task();
+    if (collapseQueue.length > 0) scheduleCollapseFlush();
+  });
+}
+
+function enqueueCollapse(task: () => void): void {
+  collapseQueue.push(task);
+  scheduleCollapseFlush();
+}
+
 export interface DecorateOptions {
   collapseMisses: boolean;
 }
@@ -175,5 +204,19 @@ export function decoratePost(
     renderMissStrip(state.shadow, authorName, expanded, () => applyCollapse(!state.expanded));
   };
 
-  applyCollapse(state.expanded);
+  // Growing back to full height carries no scroll-height-jump risk, so a
+  // post the user already expanded (or one whose settled state is
+  // "expanded") applies immediately. Collapsing to 0 height is the risky
+  // direction — see the comment above enqueueCollapse — so it's throttled.
+  // The `!state.expanded` re-check inside the queued task guards against
+  // the user clicking "expand" (a synchronous, instant applyCollapse(true)
+  // call) while this post's collapse is still sitting in the queue.
+  if (state.expanded) {
+    applyCollapse(true);
+  } else {
+    renderMissStrip(state.shadow, authorName, false, () => applyCollapse(!state.expanded));
+    enqueueCollapse(() => {
+      if (!state.expanded) applyCollapse(false);
+    });
+  }
 }
