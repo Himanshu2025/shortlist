@@ -7,6 +7,7 @@ describe("extractFacets", () => {
       seniority: null,
       workMode: null,
       sponsorship: null,
+      salary: null,
     });
   });
 
@@ -36,5 +37,25 @@ describe("extractFacets", () => {
 
   it("recognizes remote over no mode mentioned", () => {
     expect(extractFacets("Fully remote position, work from anywhere").workMode).toBe("remote");
+  });
+
+  it("extracts a salary range with k-suffixed amounts", () => {
+    expect(extractFacets("Paying $120k-$150k depending on experience.").salary).toBe(
+      "$120k-$150k",
+    );
+  });
+
+  it("extracts a salary range with 'to' as the separator and one currency symbol", () => {
+    expect(extractFacets("Budget is $90,000 to 110,000 for this role.").salary).toBe(
+      "$90,000 to 110,000",
+    );
+  });
+
+  it("extracts a single salary figure, not just ranges", () => {
+    expect(extractFacets("Base salary of £55k plus equity.").salary).toBe("£55k");
+  });
+
+  it("returns null salary when no currency figure is present", () => {
+    expect(extractFacets("Great compensation and benefits package.").salary).toBeNull();
   });
 });

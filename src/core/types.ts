@@ -3,6 +3,9 @@ export interface SkillRule {
   name: string;
   /** Additional phrases that count as this skill (e.g. "js" for "JavaScript"). */
   aliases: string[];
+  /** When true, a post must name this skill to match, regardless of other
+   * skill mentions — AND semantics instead of the default OR-any-skill. */
+  required: boolean;
 }
 
 export interface Ruleset {
@@ -36,6 +39,9 @@ export interface Facets {
   seniority: Seniority;
   workMode: WorkMode;
   sponsorship: Sponsorship;
+  /** Raw matched text of a salary figure/range (e.g. "$120k-$150k"), kept
+   * verbatim rather than normalized — display only, like the other facets. */
+  salary: string | null;
 }
 
 export interface MatchExplanation {
@@ -43,6 +49,18 @@ export interface MatchExplanation {
   excludePhraseHit: string | null;
   matchedSkills: string[];
   matchedLocations: string[];
+  /** Required skills (see SkillRule.required) that did NOT match — a
+   * non-empty list here is why an otherwise-hiring post was rejected. */
+  missingRequiredSkills: string[];
+}
+
+/** A short excerpt of the post text around the first matched skill, with
+ * the matched substring's offsets — lets the UI show *where* it matched
+ * without touching LinkedIn's own DOM nodes. */
+export interface MatchSnippet {
+  text: string;
+  highlightStart: number;
+  highlightEnd: number;
 }
 
 export interface Verdict {
@@ -51,6 +69,8 @@ export interface Verdict {
   matchedLocations: string[];
   facets: Facets;
   explanation: MatchExplanation;
-  /** True when the post is a job post AND names at least one wanted skill. */
+  snippet: MatchSnippet | null;
+  /** True when the post is a job post, every required skill (if any) is
+   * named, and at least one skill overall is named. */
   isMatch: boolean;
 }

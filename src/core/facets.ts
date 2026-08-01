@@ -22,6 +22,16 @@ const SPONSORSHIP_NOT_OFFERED =
 const SPONSORSHIP_OFFERED =
   /\b(visa sponsorship (available|offered|provided)|will sponsor|sponsorship available|we sponsor|sponsorship (?:is )?(?:offered|provided))\b/i;
 
+// One currency symbol + number ("$120k", "£45,000"), optionally followed by
+// a second one across a range separator ("$120k-$150k", "$120k to $150k").
+// Display only, like the other facets — kept as the raw matched text
+// (symbols, casing, separators) rather than parsed into a structured value.
+const CURRENCY = "[$£€]";
+const AMOUNT = "\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?\\s?[kK]?";
+const SALARY_RANGE = new RegExp(
+  `${CURRENCY}\\s?${AMOUNT}(?:\\s?(?:-|–|—|to)\\s?${CURRENCY}?\\s?${AMOUNT})?`,
+);
+
 export function extractFacets(text: string): Facets {
   const seniority =
     SENIORITY_PATTERNS.find(([, regex]) => regex.test(text))?.[0] ?? null;
@@ -35,5 +45,7 @@ export function extractFacets(text: string): Facets {
     sponsorship = "offered";
   }
 
-  return { seniority, workMode, sponsorship };
+  const salary = SALARY_RANGE.exec(text)?.[0]?.trim() ?? null;
+
+  return { seniority, workMode, sponsorship, salary };
 }

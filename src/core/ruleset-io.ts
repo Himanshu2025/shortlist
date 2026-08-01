@@ -12,10 +12,14 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
-function isSkillRule(value: unknown): value is SkillRule {
+function isSkillRule(value: unknown): value is Omit<SkillRule, "required"> & { required?: boolean } {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Record<string, unknown>;
-  return typeof candidate["name"] === "string" && isStringArray(candidate["aliases"]);
+  return (
+    typeof candidate["name"] === "string" &&
+    isStringArray(candidate["aliases"]) &&
+    (candidate["required"] === undefined || typeof candidate["required"] === "boolean")
+  );
 }
 
 export function parseRulesetJson(raw: string): RulesetImportResult {
@@ -47,7 +51,9 @@ export function parseRulesetJson(raw: string): RulesetImportResult {
   return {
     ok: true,
     ruleset: {
-      skills: candidate["skills"] as SkillRule[],
+      skills: (candidate["skills"] as Array<Omit<SkillRule, "required"> & { required?: boolean }>).map(
+        (skill) => ({ ...skill, required: skill.required ?? false }),
+      ),
       locations: candidate["locations"] as string[],
       hiringPhrases: candidate["hiringPhrases"] as string[],
       excludePhrases: candidate["excludePhrases"] as string[],

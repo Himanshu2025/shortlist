@@ -108,3 +108,69 @@ describe("evaluatePost", () => {
     expect(verdict.isMatch).toBe(true);
   });
 });
+
+describe("required skills (AND semantics)", () => {
+  function rulesetWithSkills(skills: { name: string; aliases: string[]; required: boolean }[]) {
+    return compileRuleset({
+      skills,
+      locations: [],
+      hiringPhrases: ["hiring"],
+      excludePhrases: [],
+    });
+  }
+
+  it("matches once every required skill is named, even if an optional one isn't mentioned", () => {
+    const rc = rulesetWithSkills([
+      { name: "TypeScript", aliases: ["ts"], required: true },
+      { name: "GraphQL", aliases: [], required: false },
+    ]);
+    const post = { urn: "r1", text: "We're hiring a TypeScript engineer.", authorName: "" };
+    const verdict = evaluatePost(post, rc);
+    expect(verdict.isMatch).toBe(true);
+    expect(verdict.explanation.missingRequiredSkills).toEqual([]);
+  });
+
+  it("rejects the post when a required skill is missing, even if another skill matched", () => {
+    const rc = rulesetWithSkills([
+      { name: "TypeScript", aliases: ["ts"], required: true },
+      { name: "React", aliases: [], required: false },
+    ]);
+    const post = { urn: "r2", text: "We're hiring a React engineer.", authorName: "" };
+    const verdict = evaluatePost(post, rc);
+    expect(verdict.isMatch).toBe(false);
+    expect(verdict.explanation.missingRequiredSkills).toEqual(["TypeScript"]);
+  });
+
+  it("demands ALL required skills, not just one of them", () => {
+    const rc = rulesetWithSkills([
+      { name: "TypeScript", aliases: [], required: true },
+      { name: "GraphQL", aliases: [], required: true },
+    ]);
+    const post = { urn: "r3", text: "We're hiring a TypeScript engineer.", authorName: "" };
+    const verdict = evaluatePost(post, rc);
+    expect(verdict.isMatch).toBe(false);
+    expect(verdict.explanation.missingRequiredSkills).toEqual(["GraphQL"]);
+  });
+
+  it("falls back to OR-any-skill when no skill is marked required", () => {
+    const rc = rulesetWithSkills([
+      { name: "TypeScript", aliases: [], required: false },
+      { name: "React", aliases: [], required: false },
+    ]);
+    const post = { urn: "r4", text: "We're hiring a React engineer.", authorName: "" };
+    expect(evaluatePost(post, rc).isMatch).toBe(true);
+  });
+});
+
+describe("match snippet", () => {
+  it("builds an excerpt around the first matched skill, with correct highlight offsets", () => {
+    const verdict = evaluatePost(HIRING_REACT_POST, compiled);
+    expect(verdict.snippet).not.toBeNull();
+    const { text, highlightStart, highlightEnd } = verdict.snippet!;
+    expect(text.slice(highlightStart, highlightEnd)).toBe("React");
+  });
+
+  it("is null when the post isn't a match", () => {
+    expect(evaluatePost(CONGRATS_REACT_POST, compiled).snippet).toBeNull();
+  });
+});

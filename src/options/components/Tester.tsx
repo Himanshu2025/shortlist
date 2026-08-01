@@ -67,9 +67,18 @@ export function Tester({ ruleset }: TesterProps) {
         <div className="flex flex-col gap-1.5">
           <Row label="Hiring phrase" value={verdict.explanation.hiringPhraseHit ?? "(none)"} />
           <Row label="Exclude phrase" value={verdict.explanation.excludePhraseHit ?? "(none)"} />
+          <Row
+            label="Required skills"
+            value={
+              verdict.explanation.missingRequiredSkills.length === 0
+                ? "(all present, or none configured)"
+                : `missing ${verdict.explanation.missingRequiredSkills.join(", ")}`
+            }
+          />
           <Row label="Seniority" value={verdict.facets.seniority ?? "(none)"} />
           <Row label="Work mode" value={verdict.facets.workMode ?? "(none)"} />
           <Row label="Sponsorship" value={verdict.facets.sponsorship ?? "(none)"} />
+          <Row label="Salary" value={verdict.facets.salary ?? "(none)"} />
         </div>
 
         {(verdict.matchedSkills.length > 0 || verdict.matchedLocations.length > 0) && (
@@ -90,6 +99,14 @@ export function Tester({ ruleset }: TesterProps) {
           <p className="mt-3 text-xs text-ink/50">
             Excluded because "{verdict.explanation.excludePhraseHit}" matched — this is what stops
             "congrats on your new React role" from being flagged as hiring.
+          </p>
+        )}
+
+        {verdict.explanation.missingRequiredSkills.length > 0 && (
+          <p className="mt-3 text-xs text-ink/50">
+            Not a match — missing required skill
+            {verdict.explanation.missingRequiredSkills.length > 1 ? "s" : ""}:{" "}
+            {verdict.explanation.missingRequiredSkills.join(", ")}.
           </p>
         )}
       </div>

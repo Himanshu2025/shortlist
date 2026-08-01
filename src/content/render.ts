@@ -65,6 +65,7 @@ function renderMatchBar(shadow: ShadowRoot, verdict: Verdict): void {
       verdict.facets.sponsorship === "offered" ? "sponsorship offered" : "no sponsorship",
     );
   }
+  if (verdict.facets.salary) facetLabels.push(verdict.facets.salary);
   for (const label of facetLabels) {
     const chip = document.createElement("span");
     chip.className = "sl-chip sl-chip--facet";
@@ -73,6 +74,23 @@ function renderMatchBar(shadow: ShadowRoot, verdict: Verdict): void {
   }
 
   bar.appendChild(row);
+
+  // Built from three text nodes plus a <mark>, never innerHTML — the post
+  // text is untrusted (LinkedIn user content), so this must never be
+  // interpreted as markup.
+  if (verdict.snippet) {
+    const { text, highlightStart, highlightEnd } = verdict.snippet;
+    const p = document.createElement("p");
+    p.className = "sl-snippet";
+    p.appendChild(document.createTextNode(text.slice(0, highlightStart)));
+    const mark = document.createElement("mark");
+    mark.className = "sl-snippet__mark";
+    mark.textContent = text.slice(highlightStart, highlightEnd);
+    p.appendChild(mark);
+    p.appendChild(document.createTextNode(text.slice(highlightEnd)));
+    bar.appendChild(p);
+  }
+
   shadow.appendChild(bar);
 }
 

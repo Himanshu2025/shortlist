@@ -50,7 +50,11 @@ arriving late.
 2. **Does it name a skill you care about?** Each skill's name and aliases
    are compiled into a word-boundary-guarded regex, so "React" doesn't
    match "reactive" or "reaction", and a bare alias like "node" doesn't
-   match inside a hyphenated compound like `some-node-service`.
+   match inside a hyphenated compound like `some-node-service`. By default
+   any one matched skill is enough (OR). Marking a skill "Required" in the
+   options page switches that skill into an AND condition — all required
+   skills must be named for a match, and any non-required skills become
+   optional bonus chips rather than something that alone can trigger a match.
 
 Nothing here is hardcoded — every phrase list and skill/alias mapping is
 plain user data, edited from the options page, with "reset to defaults"
@@ -61,19 +65,28 @@ extracted post text are both normalized for typographic quotes (LinkedIn
 renders "we're" as "we’re"), so a phrase typed with a straight apostrophe
 still matches text rendered with a curly one.
 
-Seniority, work mode, and sponsorship are also extracted by plain regex
-for display only — all three are nullable, since most posts say nothing
-about them.
+Seniority, work mode, sponsorship, and a salary figure/range are also
+extracted by plain regex for display only — all four are nullable, since
+most posts say nothing about them.
 
 ## Rendering
 
 Matching posts get a small accent-bordered bar with matched-skill chips
 (shown in monospace — they're literal query tokens) plus seniority/work
-mode/sponsorship if the post states them. Non-matching posts collapse to a
-one-line strip (author name + a muted "no match" tag) that expands on
-click. Nothing is ever removed from the page — LinkedIn's own post nodes
-stay mounted the whole time, which is what avoids scroll jump in a
-virtualized feed.
+mode/sponsorship/salary if the post states them, and a short excerpt of
+the post text around the first matched skill with that match highlighted.
+That excerpt is rendered entirely inside our own shadow DOM bar, built from
+text nodes (never `innerHTML`, since the post text is untrusted) — it never
+touches LinkedIn's own post markup, for the same reason nothing else here
+does (see below). Non-matching posts collapse to a one-line strip (author
+name + a muted "no match" tag) that expands on click. Nothing is ever
+removed from the page — LinkedIn's own post nodes stay mounted the whole
+time, which is what avoids scroll jump in a virtualized feed.
+
+The popup also reports how many matches the active tab has found so far —
+a plain in-memory counter on the content script, read on demand via
+`chrome.runtime` messaging (no new permission; not persisted, and reset on
+reload same as everything else here).
 
 All injected UI renders inside a Shadow DOM, so LinkedIn's CSS can't
 restyle it and its own CSS can't leak into LinkedIn's layout.

@@ -11,6 +11,7 @@ export interface CompiledPhraseList {
 
 export interface CompiledSkill {
   name: string;
+  required: boolean;
   combined: RegExp;
   items: { phrase: string; regex: RegExp }[];
 }
@@ -43,7 +44,7 @@ export function compileRuleset(ruleset: Ruleset): CompiledRuleset {
       // A skill's name is implicitly its own alias.
       const phrases = [skill.name, ...skill.aliases];
       const { combined, items } = compilePhraseList(phrases);
-      return { name: skill.name, combined, items };
+      return { name: skill.name, required: skill.required, combined, items };
     }),
   };
 }

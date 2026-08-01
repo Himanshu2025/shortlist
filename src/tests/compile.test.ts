@@ -19,7 +19,7 @@ describe("compileRuleset", () => {
     // "Nothing to repeat" when the pattern compiles. Reaching the
     // assertions at all proves escaping happened.
     const compiled = compileRuleset(
-      rulesetWith({ skills: [{ name: "C++", aliases: [] }] }),
+      rulesetWith({ skills: [{ name: "C++", aliases: [], required: false }] }),
     );
     expect(matchSkills("Looking for a C++ developer", compiled)).toContain("C++");
     expect(matchSkills("just the letter c on its own", compiled)).toEqual([]);
@@ -35,7 +35,7 @@ describe("compileRuleset", () => {
 
   it("treats a skill's own name as an implicit alias", () => {
     const compiled = compileRuleset(
-      rulesetWith({ skills: [{ name: "Go", aliases: ["golang"] }] }),
+      rulesetWith({ skills: [{ name: "Go", aliases: ["golang"], required: false }] }),
     );
     expect(matchSkills("I love Go development", compiled)).toContain("Go");
     expect(matchSkills("built entirely in Golang", compiled)).toContain("Go");
@@ -43,7 +43,7 @@ describe("compileRuleset", () => {
 
   it("word-boundary guards prevent 'react' from matching 'reactive'", () => {
     const compiled = compileRuleset(
-      rulesetWith({ skills: [{ name: "React", aliases: [] }] }),
+      rulesetWith({ skills: [{ name: "React", aliases: [], required: false }] }),
     );
     expect(matchSkills("we use reactive extensions", compiled)).toEqual([]);
     expect(matchSkills("we use React daily", compiled)).toContain("React");

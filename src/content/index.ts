@@ -6,6 +6,7 @@ import { POST_CONTAINER_SELECTORS, queryAllChain } from "./selectors";
 import { buildFeedPost, getUrn } from "./extract";
 import { decoratePost, clearDecoration } from "./render";
 import { reportScan } from "./staleness";
+import { GET_MATCH_COUNT, type GetMatchCountResponse } from "../messaging";
 
 // Keyed on the post's render identity (FeedPost.urn — see extract.ts),
 // not DOM node — the feed is virtualized and recycles nodes, so without
@@ -13,6 +14,11 @@ import { reportScan } from "./staleness";
 // This Map lives only in memory: it dies on reload, and that's what keeps
 // "stores nothing" literally true.
 const verdicts = new Map<string, Verdict>();
+
+// Distinct matching posts seen this tab session — incremented as new
+// verdicts are computed, never decremented (posts don't leave `verdicts`
+// once scrolled past). Reported to the popup on request; never persisted.
+let matchCount = 0;
 
 let settings: Settings | null = null;
 let scanScheduled = false;
@@ -53,6 +59,7 @@ function scan(nodesObserved: boolean): void {
     if (!verdict) {
       verdict = evaluatePost(post, compiled);
       verdicts.set(post.urn, verdict);
+      if (verdict.isMatch) matchCount += 1;
     }
 
     decoratePost(container, post.urn, verdict, post.authorName, {
@@ -100,8 +107,11 @@ async function init(): Promise<void> {
   onSettingsChanged((next) => {
     settings = next;
     // Ruleset (or toggles) changed — clear the cache and re-decorate
-    // everything currently rendered so the feed updates live.
+    // everything currently rendered so the feed updates live. The count
+    // resets too: it's a reflection of the current ruleset, not a
+    // cross-ruleset lifetime total.
     verdicts.clear();
+    matchCount = 0;
     scan(false);
   });
 
@@ -113,6 +123,12 @@ async function init(): Promise<void> {
     if (sawAddedNodes) scheduleScan();
   });
   observer.observe(observedRoot, { childList: true, subtree: true });
+
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type !== GET_MATCH_COUNT) return;
+    const response: GetMatchCountResponse = { count: matchCount };
+    sendResponse(response);
+  });
 }
 
 void init();
