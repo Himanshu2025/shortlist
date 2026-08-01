@@ -86,7 +86,16 @@ time, which is what avoids scroll jump in a virtualized feed.
 The popup also reports how many matches the active tab has found so far —
 a plain in-memory counter on the content script, read on demand via
 `chrome.runtime` messaging (no new permission; not persisted, and reset on
-reload same as everything else here).
+reload same as everything here).
+
+Chrome only injects content scripts into tabs that load *after* the
+extension is installed, rebuilt, or re-enabled — a LinkedIn tab that was
+already open won't have Shortlist running until it reloads. Rather than
+add a background worker with `scripting`/`tabs` permissions to force that
+(which this project deliberately doesn't have), the popup detects the
+silent tab — the match-count ping goes unanswered — and offers a one-click
+"Reload this tab" button instead of a background script doing it for you
+unprompted, so an unsent post draft in the feed doesn't get lost.
 
 All injected UI renders inside a Shadow DOM, so LinkedIn's CSS can't
 restyle it and its own CSS can't leak into LinkedIn's layout.
