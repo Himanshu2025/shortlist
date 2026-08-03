@@ -2,18 +2,13 @@ import type { Ruleset } from "./types";
 
 // Seed values only — every field here is editable (add/remove/reset per
 // section) from the options page. Nothing in matching.ts hardcodes these.
-export const DEFAULT_SKILLS: Ruleset["skills"] = [
-  { name: "React", aliases: ["react.js", "reactjs"], required: false },
-  { name: "TypeScript", aliases: ["ts"], required: false },
-  { name: "JavaScript", aliases: ["js", "ecmascript"], required: false },
-  { name: "Node.js", aliases: ["node", "nodejs"], required: false },
-  { name: "Python", aliases: ["py"], required: false },
-  { name: "Go", aliases: ["golang"], required: false },
-  { name: "Rust", aliases: [], required: false },
-  { name: "Kubernetes", aliases: ["k8s"], required: false },
-  { name: "AWS", aliases: ["amazon web services"], required: false },
-  { name: "GraphQL", aliases: [], required: false },
-];
+// Skills start empty deliberately: they're a personal stack, not a
+// universal default, and shipping someone else's opinionated tech list
+// (React, TypeScript, ...) as the out-of-the-box behavior isn't the right
+// first impression for a public listing. The hiring/exclude phrase lists
+// stay populated so gate 1 still does something meaningful before a user
+// adds their own skills.
+export const DEFAULT_SKILLS: Ruleset["skills"] = [];
 
 export const DEFAULT_LOCATIONS: string[] = ["Remote", "Melbourne", "Sydney"];
 

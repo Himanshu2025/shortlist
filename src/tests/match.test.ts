@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Ruleset } from "../core/types";
 import { DEFAULT_RULESET } from "../core/defaults";
 import { compileRuleset } from "../core/compile";
 import { evaluatePost, isJobPost, matchSkills } from "../core/match";
@@ -14,7 +15,19 @@ import {
   SENIORITY_AND_REMOTE_POST,
 } from "./fixtures/posts";
 
-const compiled = compileRuleset(DEFAULT_RULESET);
+// DEFAULT_RULESET ships with an empty skill list (see core/defaults.ts) —
+// deliberately, so a fresh install isn't seeded with someone else's tech
+// stack. These tests need real skills to exercise matchSkills/evaluatePost
+// against, so they supply their own rather than depending on product
+// defaults that are meant to change independently of test behavior.
+const TEST_SKILLS: Ruleset["skills"] = [
+  { name: "React", aliases: ["react.js", "reactjs"], required: false },
+  { name: "TypeScript", aliases: ["ts"], required: false },
+  { name: "Node.js", aliases: ["node", "nodejs"], required: false },
+  { name: "GraphQL", aliases: [], required: false },
+];
+
+const compiled = compileRuleset({ ...DEFAULT_RULESET, skills: TEST_SKILLS });
 
 describe("isJobPost", () => {
   it("flags a post with an explicit hiring phrase", () => {
