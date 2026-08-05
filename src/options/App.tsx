@@ -27,21 +27,23 @@ export function App() {
   const { ruleset } = settings;
 
   return (
-    <div className="min-h-screen bg-paper text-ink">
-      <div className="mx-auto flex max-w-2xl flex-col gap-5 px-6 py-10">
-        <header className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-ink shadow-sm">
+    <div className="min-h-screen text-ink">
+      <header className="sticky top-0 z-10 border-b border-ink/8 bg-paper/85 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-2xl items-center gap-3 px-6 py-4">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-ink shadow-sm shadow-accent/40">
             <ListFilter className="size-5" />
           </span>
           <div>
-            <h1 className="text-lg font-bold">Shortlist</h1>
-            <p className="text-sm text-ink/60">
+            <h1 className="text-base font-bold tracking-tight">Shortlist</h1>
+            <p className="text-xs text-ink/55">
               Highlights hiring posts that mention your skills, collapses the rest. Nothing here
               leaves your browser.
             </p>
           </div>
-        </header>
+        </div>
+      </header>
 
+      <div className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-8">
         <FilterSentence skills={ruleset.skills} locations={ruleset.locations} />
 
         <Toggles

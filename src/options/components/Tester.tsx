@@ -45,7 +45,7 @@ export function Tester({ ruleset }: TesterProps) {
         <Textarea id="tester-text" value={text} onChange={(e) => setText(e.target.value)} rows={4} />
       </div>
 
-      <div className="rounded-lg border border-ink/10 p-4">
+      <div className="rounded-xl border border-ink/8 bg-paper/60 p-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span
             className={cn(

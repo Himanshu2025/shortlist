@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 // Skills/phrases render as monospace — they're literal query tokens, so
 // mono is semantically right here, not decorative.
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-xs",
+  "inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-xs transition-colors duration-150",
   {
     variants: {
       variant: {
-        outline: "border-ink/15 bg-white text-ink",
-        accent: "border-accent bg-accent/10 font-semibold text-ink",
+        outline: "border-ink/15 bg-white text-ink hover:border-ink/25",
+        accent: "border-accent/60 bg-accent/10 font-semibold text-ink",
       },
     },
     defaultVariants: {

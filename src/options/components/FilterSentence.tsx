@@ -47,7 +47,7 @@ export function FilterSentence({ skills, locations }: FilterSentenceProps) {
   }
 
   return (
-    <p className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3.5 py-2.5 text-sm text-ink">
+    <p className="flex items-start gap-2 rounded-xl border border-accent/25 bg-accent/[0.06] px-4 py-3 text-sm leading-relaxed text-ink shadow-[0_1px_2px_rgba(28,25,23,0.03)]">
       <Filter className="mt-0.5 size-4 shrink-0 text-accent" />
       <span>{sentence}</span>
     </p>

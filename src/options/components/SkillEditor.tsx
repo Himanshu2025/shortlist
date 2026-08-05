@@ -44,7 +44,7 @@ function SkillRow({
   const requiredId = `skill-required-${skill.name}`;
 
   return (
-    <div className="rounded-md border border-ink/10 p-3">
+    <div className="rounded-lg border border-ink/8 bg-paper/50 p-3 transition-colors duration-150 hover:border-ink/15">
       <div className="mb-2 flex items-center gap-2">
         <Input
           type="text"
