@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/icons/icon128.png" width="96" height="96" alt="Shortlist logo" />
+</p>
+
 # Shortlist
 
 A Chrome extension (Manifest V3) that highlights hiring posts in your
