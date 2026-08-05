@@ -94,6 +94,27 @@ function renderMatchBar(shadow: ShadowRoot, verdict: Verdict): void {
   shadow.appendChild(bar);
 }
 
+// Built with the SVG DOM API rather than innerHTML, same reasoning as the
+// snippet highlight above — nothing here is untrusted, it's just a fixed
+// glyph, but createElementNS keeps every render.ts DOM insertion on the
+// same never-parse-a-string discipline.
+function buildChevron(): SVGSVGElement {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "10");
+  svg.setAttribute("height", "10");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.classList.add("sl-strip__chevron");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M6 9l6 6 6-6");
+  svg.appendChild(path);
+  return svg;
+}
+
 function renderMissStrip(
   shadow: ShadowRoot,
   authorName: string,
@@ -107,6 +128,7 @@ function renderMissStrip(
   const author = document.createElement("span");
   author.className = "sl-strip__author";
   author.textContent = authorName || "Unknown";
+  author.title = authorName || "Unknown";
   strip.appendChild(author);
 
   const tag = document.createElement("span");
@@ -117,9 +139,12 @@ function renderMissStrip(
   const button = document.createElement("button");
   button.className = "sl-strip__expand";
   button.type = "button";
-  button.textContent = expanded ? "collapse" : "expand";
   button.setAttribute("aria-expanded", String(expanded));
   button.addEventListener("click", onToggle);
+  const label = document.createElement("span");
+  label.textContent = expanded ? "collapse" : "expand";
+  button.appendChild(label);
+  button.appendChild(buildChevron());
   strip.appendChild(button);
 
   shadow.appendChild(strip);
